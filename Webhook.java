@@ -29,8 +29,8 @@ public class Webhook {
             {
               "prompt": "%s",
               "model": "%s",
-              "width": 1440,
-              "height": 1440,
+              "width": 600,
+              "height": 600,
               "steps": 4,
               "n": 1
             }
