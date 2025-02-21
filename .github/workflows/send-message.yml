@@ -1,7 +1,7 @@
 name: send message
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   send-message:
@@ -21,14 +21,18 @@ jobs:
           javac Webhook.java
           java Webhook
         env:
+          # 슬랙 관련 환경변수
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_MSG: ${{ vars.SLACK_WEBHOOK_MSG }}
+          SLACK_WEBHOOK_TITLE: ${{ secrets.SLACK_WEBHOOK_TITLE }}
+          
+          # 이미지 생성 API 관련 환경변수
           LLM2_API_KEY: ${{ secrets.LLM2_API_KEY }}
           LLM2_API_URL: ${{ secrets.LLM2_API_URL }}
           LLM2_IMAGE_TEMPLATE: ${{ secrets.LLM2_IMAGE_TEMPLATE }}
           LLM2_MODEL: ${{ secrets.LLM2_MODEL }}
-          LLM_API_KEY: ${{ secrets.LLM2_API_KEY }}
-          LLM_API_URL: ${{ secrets.LLM2_API_URL }}
+          
+          # 텍스트 생성 API 관련 환경변수 (이미지 생성 API와 분리되어야 함)
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_API_URL: ${{ secrets.LLM_API_URL }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
           LLM_PROMPT: ${{ secrets.LLM_PROMPT }}
-          SLACK_WEBHOOK_TITLE: ${{ secrets.SLACK_WEBHOOK_TITLE }}
