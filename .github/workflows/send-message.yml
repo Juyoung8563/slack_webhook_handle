@@ -18,8 +18,8 @@ jobs:
 
       - name: Compile and Run Bot
         run: |
-          javac Bot.java
-          java Bot
+          javac Webhook.java
+          java Webhook
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_MSG: ${{ vars.SLACK_WEBHOOK_MSG }}
