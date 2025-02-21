@@ -18,42 +18,51 @@ public class Webhook {
     }
 
     public static String useLLMForImage(String prompt) {
-
-        String apiUrl = System.getenv("LLM2_API_URL"); // 환경변수로 관리
-        String apiKey = System.getenv("LLM2_API_KEY"); // 환경변수로 관리
-        String model = System.getenv("LLM2_MODEL"); // 환경변수로 관리
-        String payload = """
-                {
-                  "prompt": "%s",
-                  "model": "%s",
-                  "width": 1440,
-                  "height": 1440,
-                  "steps": 4,
-                  "n": 1
-                }
-                """.formatted(prompt, model); // 대부분 JSON 파싱 문제는 , 문제!
-        HttpClient client = HttpClient.newHttpClient(); // 새롭게 요청할 클라이언트 생성
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl)) // URL을 통해서 어디로 요청을 보내는지 결정
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + apiKey)
-                .POST(HttpRequest.BodyPublishers.ofString(payload))
-                .build(); // 핵심
-        String result = null; // return을 하려면 일단은 할당이 되긴 해야함
-        try { // try
-            HttpResponse<String> response = client.send(request,
-                    HttpResponse.BodyHandlers.ofString());
-            System.out.println("response.statusCode() = " + response.statusCode());
-            System.out.println("response.body() = " + response.body());
-            
-            result = response.body()
-                    .split("url\": \"")[1]
-                    .split("\",")[0];
-        } catch (Exception e) { // catch exception e
-            throw new RuntimeException(e);
-        }
-        return result; // 앞뒤를 자르고 우리에게 필요한 내용만 리턴
+    String apiUrl = System.getenv("LLM2_API_URL"); // 환경변수로 관리
+    String apiKey = System.getenv("LLM2_API_KEY"); // 환경변수로 관리
+    String model = System.getenv("LLM2_MODEL"); // 환경변수로 관리
+    if(model == null || model.isBlank()){
+        System.out.println("Warning: LLM2_MODEL is not set. Using default model 'black-forest-labs/FLUX.1-schnell-Free'.");
+        model = "black-forest-labs/FLUX.1-schnell-Free";
     }
+    String payload = """
+            {
+              "prompt": "%s",
+              "model": "%s",
+              "width": 1440,
+              "height": 1440,
+              "steps": 4,
+              "n": 1
+            }
+            """.formatted(prompt, model);
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(apiUrl))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer " + apiKey)
+            .POST(HttpRequest.BodyPublishers.ofString(payload))
+            .build();
+    String result = null;
+    try {
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("response.statusCode() = " + response.statusCode());
+        System.out.println("response.body() = " + response.body());
+        String responseBody = response.body();
+        // 에러 응답이 포함된 경우 체크
+        if(responseBody.contains("\"error\"")){
+            throw new RuntimeException("LLM2 API error: " + responseBody);
+        }
+        if(!responseBody.contains("url\": \"")){
+            throw new RuntimeException("Unexpected response format from LLM2 API: " + responseBody);
+        }
+        // 응답 파싱
+        result = responseBody.split("url\": \"")[1].split("\",")[0];
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
+    return result;
+}
+
 
     public static String useLLM(String prompt) {
 
